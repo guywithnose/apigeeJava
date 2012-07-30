@@ -30,6 +30,31 @@ public class JavaCurl {
   }
 
   /**
+   * Gets the url.
+   * 
+   * @param url
+   *          the url
+   * @param method
+   *          the method
+   * @param Params
+   *          the params
+   * @return the url
+   */
+  public static String getUrl(String url, String method, HashMap<String, String> Params) {
+    return getUrl(url, method, "", new HashMap<String, String>(), Params);
+  }
+
+  /**
+   * Async get url.
+   * 
+   * @param url
+   *          the url
+   */
+  public static void asyncGetUrl(String url) {
+    asyncGetUrl(url, "GET", "", new HashMap<String, String>(), new HashMap<String, String>());
+  }
+
+  /**
    * Async get url.
    * 
    * @param url
@@ -40,32 +65,53 @@ public class JavaCurl {
    *          the data
    * @param headers
    *          the headers
+   * @param params
+   *          the params
    */
   @SuppressWarnings("unused")
-  public static void asyncGetUrl(String url, String method, String data, Map<String, String> headers) {
+  public static void asyncGetUrl(String url, String method, String data, Map<String, String> headers, Map<String, String> params) {
     class aSync implements Runnable {
 
       private String urlASync;
       private String methodASync;
       private String dataAsync;
       private Map<String, String> headersAsync;
+      private Map<String, String> paramsAsync;
 
       @Override
       public void run() {
-        getUrl(urlASync, methodASync, dataAsync, headersAsync);
+        getUrl(urlASync, methodASync, dataAsync, headersAsync, paramsAsync);
       }
 
-      public aSync(String Url, String Method, String Data, Map<String, String> Headers) {
+      public aSync(String Url, String Method, String Data, Map<String, String> Headers, Map<String, String> Params) {
         this.urlASync = Url;
         this.methodASync = Method;
         this.dataAsync = Data;
         this.headersAsync = Headers;
+        this.paramsAsync = Params;
         run();
       }
 
     }
     // Run as thread
-    aSync a = new aSync(url, method, data, headers);
+    aSync a = new aSync(url, method, data, headers, params);
+  }
+
+  /**
+   * Gets the url.
+   * 
+   * @param url
+   *          the url
+   * @param method
+   *          the method
+   * @param data
+   *          the data
+   * @param Headers
+   *          the headers
+   * @return the url
+   */
+  public static String getUrl(String url, String method, String data, Map<String, String> Headers) {
+    return getUrl(url, method, data, Headers, new HashMap<String, String>());
   }
 
   /**
@@ -79,9 +125,12 @@ public class JavaCurl {
    *          the data
    * @param Headers
    *          the headers
+   * @param params
+   *          the params
    * @return the url
    */
-  public static String getUrl(String url, String method, String data, Map<String, String> Headers) {
+  public static String getUrl(String url, String method, String data, Map<String, String> Headers,
+            Map<String, String> params) {
     try {
       URL u = new URL(url);
       HttpURLConnection http = (HttpURLConnection) u.openConnection();
@@ -97,6 +146,20 @@ public class JavaCurl {
         http.setDoInput(true);
         DataOutputStream wr = new DataOutputStream(http.getOutputStream());
         wr.writeBytes(data);
+        wr.flush();
+        wr.close();
+      } else if (params.size() > 0)
+      {
+        http.setDoOutput(true);
+        http.setDoInput(true);
+        String urlParameters = "";
+        for (String key : params.keySet()) {
+            urlParameters += key + "=" + params.get(key) + "&";
+        }
+
+        DataOutputStream wr = new DataOutputStream(
+            http.getOutputStream());
+        wr.writeBytes(urlParameters);
         wr.flush();
         wr.close();
       } else {
