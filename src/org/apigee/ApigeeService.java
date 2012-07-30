@@ -86,6 +86,14 @@ public class ApigeeService {
     return convertResponse(response);
   }
 
+  public JSONObject postUrl(String url) {
+    String response = JavaCurl.getUrl(
+        getProtocol() + host + "/" + authentication.getOrganization() + "/"
+            + authentication.getApplication() + "/" + url, "POST",
+        "", authenticationHeader);
+    return convertResponse(response);
+  }
+
   /**
    * Put url.
    * 

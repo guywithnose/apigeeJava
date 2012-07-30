@@ -64,6 +64,42 @@ abstract public class ApigeeEntity extends Jsonable {
       return false;
     }
   }
+  
+  public void connect(ApigeeService service, String connectionType, ApigeeEntity entity)
+  {
+    String collectionName = getCollectionName(this.getClass());
+    String entityCollectionName = getCollectionName(entity.getClass());
+    service.postUrl(collectionName + "/" + id + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getId());
+  }
+  
+  public void disconnect(ApigeeService service, String connectionType, ApigeeEntity entity)
+  {
+    String collectionName = getCollectionName(this.getClass());
+    String entityCollectionName = getCollectionName(entity.getClass());
+    service.deleteUrl(collectionName + "/" + id + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getId());
+  }
+  
+  public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> type)
+  {
+    return getConnection(service, connectionType, type, "");
+  }
+  
+  public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> type, String query)
+  {
+    List<T> resultList = new ArrayList<T>();
+    try {
+      String collectionName = getCollectionName(this.getClass());
+      JSONObject response = service.getUrl(collectionName + "/" + id + "/" + connectionType + "?ql=" + query);
+      JSONArray entities = response.getJSONArray("entities");
+      for (int i = 0; i < entities.length(); i++) {
+        T item = loadFromJson(entities.getJSONObject(i), type);
+        resultList.add(item);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return resultList;
+  }
 
   public static <T extends ApigeeEntity> List<T> search(ApigeeService service,
       String query, Class<T> type) {

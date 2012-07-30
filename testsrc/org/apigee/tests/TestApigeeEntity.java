@@ -78,4 +78,25 @@ public class TestApigeeEntity {
     assertNull(ApigeeEntity.getById(ApigeeTestFactory.getService(), "badId", Elephant.class));
   }
 
+  @Test
+  public void testConnection()
+  {
+    Elephant elephant = new Elephant();
+    elephant.intValue = 23;
+    elephant.stringValue = "testVal";
+    elephant.save(ApigeeTestFactory.getService());
+    Elephant elephant2 = new Elephant();
+    elephant2.intValue = 12;
+    elephant2.stringValue = "testVal";
+    elephant2.save(ApigeeTestFactory.getService());
+    elephant.connect(ApigeeTestFactory.getService(), "picks", elephant2);
+    List<Elephant> result = elephant.getConnection(ApigeeTestFactory.getService(), "picks", Elephant.class);
+    assertEquals(1, result.size());
+    assertEquals(12, result.get(0).intValue);
+    elephant.disconnect(ApigeeTestFactory.getService(), "picks", elephant2);
+    assertEquals(0, elephant.getConnection(ApigeeTestFactory.getService(), "picks", Elephant.class).size());
+    elephant.delete(ApigeeTestFactory.getService());
+    elephant2.delete(ApigeeTestFactory.getService());
+  }
+
 }
