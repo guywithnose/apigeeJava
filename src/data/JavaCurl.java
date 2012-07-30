@@ -18,6 +18,13 @@ import java.util.Map;
  */
 public class JavaCurl {
 
+  /**
+   * Gets the url.
+   * 
+   * @param url
+   *          the url
+   * @return the url
+   */
   public static String getUrl(String url) {
     return getUrl(url, "GET", "", new HashMap<String, String>());
   }
@@ -29,8 +36,10 @@ public class JavaCurl {
    *          the url
    * @param method
    *          the method
-   * @param params
-   *          the params
+   * @param data
+   *          the data
+   * @param headers
+   *          the headers
    */
   @SuppressWarnings("unused")
   public static void asyncGetUrl(String url, String method, String data, Map<String, String> headers) {
@@ -66,8 +75,10 @@ public class JavaCurl {
    *          the url
    * @param method
    *          the method
-   * @param params
-   *          the params
+   * @param data
+   *          the data
+   * @param Headers
+   *          the headers
    * @return the url
    */
   public static String getUrl(String url, String method, String data, Map<String, String> Headers) {

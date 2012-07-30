@@ -10,9 +10,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+/**
+ * The Class TestApigeeAuthentication.
+ */
 @SuppressWarnings("static-method")
 public class TestApigeeAuthentication {
 
+  /**
+   * Tests the authenticateAsOrganization method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   * @throws AuthenticationException
+   *           the authentication exception
+   */
   @Test
   public void testAuthenticateAsOrganization() throws JSONException,
       AuthenticationException {
@@ -24,6 +35,14 @@ public class TestApigeeAuthentication {
     assertTrue(auth.isValid());
   }
 
+  /**
+   * Tests the authenticateAsAdminUser method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   * @throws AuthenticationException
+   *           the authentication exception
+   */
   @Test
   public void testAuthenticateAsAdminUser() throws JSONException,
       AuthenticationException {
@@ -35,6 +54,14 @@ public class TestApigeeAuthentication {
     assertTrue(auth.isValid());
   }
 
+  /**
+   * Tests the authenticateAsApplication method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   * @throws AuthenticationException
+   *           the authentication exception
+   */
   @Test
   public void testAuthenticateAsApplication() throws JSONException,
       AuthenticationException {
@@ -46,6 +73,14 @@ public class TestApigeeAuthentication {
     assertTrue(auth.isValid());
   }
 
+  /**
+   * Tests the authenticateAsApplicationUser method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   * @throws AuthenticationException
+   *           the authentication exception
+   */
   @Test
   public void testAuthenticateAsApplicationUser() throws JSONException,
       AuthenticationException {
@@ -57,6 +92,12 @@ public class TestApigeeAuthentication {
     assertTrue(auth.isValid());
   }
 
+  /**
+   * Tests the failedAuthenticateAsApplicationUser method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   */
   @Test
   @SuppressWarnings("unused")
   public void testFailedAuthenticateAsApplicationUser() throws JSONException {
@@ -73,6 +114,12 @@ public class TestApigeeAuthentication {
     }
   }
 
+  /**
+   * Tests the savedAccessCode method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   */
   @Test
   @SuppressWarnings("unused")
   public void testSavedAccessCode() throws JSONException {

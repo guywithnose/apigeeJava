@@ -9,15 +9,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+/**
+ * The Class TestApigeeService.
+ */
 @SuppressWarnings("static-method")
 public class TestApigeeService {
 
+  /**
+   * Tests the getUrl method.
+   */
   @Test
   public void testGetUrl() {
     assertThat(ApigeeTestFactory.getService().getUrl("/devices").toString(),
         Matchers.containsString("/devices"));
   }
 
+  /**
+   * Tests the postUrl method.
+   * 
+   * @throws JSONException
+   *           the jSON exception
+   */
   @Test
   public void testPostUrl() throws JSONException {
     JSONObject response = ApigeeTestFactory.getService()
@@ -29,6 +41,9 @@ public class TestApigeeService {
     ApigeeTestFactory.getService().deleteUrl("/devices/" + id);
   }
 
+  /**
+   * Tests the httpConnect method.
+   */
   @Test
   public void testHttpConnect() {
     ApigeeService service = ApigeeTestFactory.getService();

@@ -9,12 +9,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.Jsonable;
 
+/**
+ * The Class ApigeeEntity.
+ */
 abstract public class ApigeeEntity extends Jsonable {
 
+  /** The id. */
   protected String id;
   
+  /** The type. */
   public String type;
   
+  /**
+   * Save.
+   * 
+   * @param service
+   *          the service
+   * @return true, if successful
+   */
   public boolean save(ApigeeService service) {
     String collectionName = getCollectionName(this.getClass());
     if (type == null) {
@@ -32,15 +44,40 @@ abstract public class ApigeeEntity extends Jsonable {
     }
     return service.putUrl(collectionName + "/" + id, toJSON()).has("entities");
   }
+  
+  /**
+   * Delete.
+   * 
+   * @param service
+   *          the service
+   */
   public void delete(ApigeeService service) {
     String collectionName = getCollectionName(this.getClass());
     service.deleteUrl(collectionName + "/" + id);
   }
 
+  /**
+   * Gets the id.
+   * 
+   * @return the id
+   */
   public String getId() {
     return id;
   }
   
+  /**
+   * Gets the by id.
+   * 
+   * @param <T>
+   *          the generic type
+   * @param service
+   *          the service
+   * @param id
+   *          the id
+   * @param type
+   *          the type
+   * @return the by id
+   */
   public static <T extends ApigeeEntity> T getById(ApigeeService service,
       String id, Class<T> type) {
     String collectionName = getCollectionName(type);
@@ -53,6 +90,15 @@ abstract public class ApigeeEntity extends Jsonable {
     }
   }
   
+  /**
+   * Load by id.
+   * 
+   * @param service
+   *          the service
+   * @param ID
+   *          the id
+   * @return true, if successful
+   */
   public boolean loadById(ApigeeService service, String ID) {
     String collectionName = getCollectionName(this.getClass());
     JSONObject response = service.getUrl(collectionName + "/" + ID);
@@ -65,6 +111,16 @@ abstract public class ApigeeEntity extends Jsonable {
     }
   }
   
+  /**
+   * Connect.
+   * 
+   * @param service
+   *          the service
+   * @param connectionType
+   *          the connection type
+   * @param entity
+   *          the entity
+   */
   public void connect(ApigeeService service, String connectionType, ApigeeEntity entity)
   {
     String collectionName = getCollectionName(this.getClass());
@@ -72,6 +128,16 @@ abstract public class ApigeeEntity extends Jsonable {
     service.postUrl(collectionName + "/" + id + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getId());
   }
   
+  /**
+   * Disconnect.
+   * 
+   * @param service
+   *          the service
+   * @param connectionType
+   *          the connection type
+   * @param entity
+   *          the entity
+   */
   public void disconnect(ApigeeService service, String connectionType, ApigeeEntity entity)
   {
     String collectionName = getCollectionName(this.getClass());
@@ -79,12 +145,40 @@ abstract public class ApigeeEntity extends Jsonable {
     service.deleteUrl(collectionName + "/" + id + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getId());
   }
   
-  public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> type)
+  /**
+   * Gets the connection.
+   * 
+   * @param <T>
+   *          the generic type
+   * @param service
+   *          the service
+   * @param connectionType
+   *          the connection type
+   * @param classType
+   *          the type
+   * @return the connection
+   */
+  public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> classType)
   {
-    return getConnection(service, connectionType, type, "");
+    return getConnection(service, connectionType, classType, "");
   }
   
-  public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> type, String query)
+  /**
+   * Gets the connection.
+   * 
+   * @param <T>
+   *          the generic type
+   * @param service
+   *          the service
+   * @param connectionType
+   *          the connection type
+   * @param classType
+   *          the type
+   * @param query
+   *          the query
+   * @return the connection
+   */
+  public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> classType, String query)
   {
     List<T> resultList = new ArrayList<T>();
     try {
@@ -92,7 +186,7 @@ abstract public class ApigeeEntity extends Jsonable {
       JSONObject response = service.getUrl(collectionName + "/" + id + "/" + connectionType + "?ql=" + query);
       JSONArray entities = response.getJSONArray("entities");
       for (int i = 0; i < entities.length(); i++) {
-        T item = loadFromJson(entities.getJSONObject(i), type);
+        T item = loadFromJson(entities.getJSONObject(i), classType);
         resultList.add(item);
       }
     } catch (Exception e) {
@@ -101,6 +195,19 @@ abstract public class ApigeeEntity extends Jsonable {
     return resultList;
   }
 
+  /**
+   * Search.
+   * 
+   * @param <T>
+   *          the generic type
+   * @param service
+   *          the service
+   * @param query
+   *          the query
+   * @param type
+   *          the type
+   * @return the list
+   */
   public static <T extends ApigeeEntity> List<T> search(ApigeeService service,
       String query, Class<T> type) {
     List<T> resultList = new ArrayList<T>();
@@ -119,6 +226,15 @@ abstract public class ApigeeEntity extends Jsonable {
     return resultList;
   }
   
+  /**
+   * Gets the collection name.
+   * 
+   * @param <T>
+   *          the generic type
+   * @param type
+   *          the type
+   * @return the collection name
+   */
   protected static <T extends ApigeeEntity> String getCollectionName(Class<T> type)
   {
     try {

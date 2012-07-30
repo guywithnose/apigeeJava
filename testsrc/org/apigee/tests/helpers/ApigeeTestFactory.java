@@ -4,12 +4,22 @@ import org.apigee.ApigeeAuthentication;
 import org.apigee.ApigeeService;
 import org.json.JSONObject;
 
+/**
+ * A factory for creating ApigeeTest objects.
+ */
 public class ApigeeTestFactory {
 
+  /** The authentication. */
   public static ApigeeAuthentication authentication;
 
+  /** The service. */
   public static ApigeeService service;
 
+  /**
+   * Gets the valid authentication.
+   * 
+   * @return the valid authentication
+   */
   public static ApigeeAuthentication getValidAuthentication() {
     if (authentication == null) {
       try {
@@ -25,6 +35,11 @@ public class ApigeeTestFactory {
     return authentication;
   }
 
+  /**
+   * Gets the service.
+   * 
+   * @return the service
+   */
   public static ApigeeService getService() {
     if (service == null) {
       service = new ApigeeService(getValidAuthentication());

@@ -10,9 +10,15 @@ import org.apigee.tests.helpers.Elephant;
 import org.apigee.tests.helpers.ElephantOverride;
 import org.junit.Test;
 
+/**
+ * The Class TestApigeeEntity.
+ */
 @SuppressWarnings("static-method")
 public class TestApigeeEntity {
 
+  /**
+   * Tests the save method.
+   */
   @Test
   public void testSave() {
     Elephant elephant = new Elephant();
@@ -31,6 +37,9 @@ public class TestApigeeEntity {
     assertEquals("new test Value", loaded.stringValue);
   }
   
+  /**
+   * Tests the collectionOverride method.
+   */
   @Test
   public void testCollectionOverride() {
     ElephantOverride elephant = new ElephantOverride();
@@ -42,6 +51,9 @@ public class TestApigeeEntity {
     assertEquals("elephant", loaded.type);
   }
   
+  /**
+   * Tests the loadById method.
+   */
   @Test
   public void testLoadById()
   {
@@ -55,6 +67,9 @@ public class TestApigeeEntity {
     assertEquals(elephant.toString(), elephant2.toString());
   }
 
+  /**
+   * Tests the search method.
+   */
   @Test
   public void testSearch() {
     for(Elephant deleteMe : ApigeeEntity.search(ApigeeTestFactory.getService(), "intValue=47", Elephant.class)) {
@@ -73,11 +88,17 @@ public class TestApigeeEntity {
     assertEquals(47, loaded.get(0).intValue);
   }
 
+  /**
+   * Tests the invalidId method.
+   */
   @Test
   public void testInvalidId() {
     assertNull(ApigeeEntity.getById(ApigeeTestFactory.getService(), "badId", Elephant.class));
   }
 
+  /**
+   * Tests the connection method.
+   */
   @Test
   public void testConnection()
   {
