@@ -32,17 +32,17 @@ abstract public class ApigeeEntity extends Jsonable {
     if (type == null) {
       type = collectionName;
     }
-    if (id == null) {
-      JSONObject response = service.postUrl(collectionName, toJSON());
-      try {
-        id = response.getJSONArray("entities").getJSONObject(0)
-            .getString("uuid");
-        return true;
-      } catch (JSONException e) {
-        return false;
-      }
+    if (exists(service)) {
+      return service.putUrl(collectionName + "/" + id, toJSON()).has("entities");
     }
-    return service.putUrl(collectionName + "/" + id, toJSON()).has("entities");
+    JSONObject response = service.postUrl(collectionName, toJSON());
+    try {
+      id = response.getJSONArray("entities").getJSONObject(0)
+          .getString("uuid");
+      return true;
+    } catch (JSONException e) {
+      return false;
+    }
   }
   
   /**
@@ -63,6 +63,11 @@ abstract public class ApigeeEntity extends Jsonable {
    */
   public String getId() {
     return id;
+  }
+
+  private boolean exists(ApigeeService service) {
+    String collectionName = getCollectionName(this.getClass());
+    return service.getUrl(collectionName + "/" + id).has("entities");
   }
   
   /**
@@ -190,7 +195,7 @@ abstract public class ApigeeEntity extends Jsonable {
         resultList.add(item);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      //Empty Connection
     }
     return resultList;
   }
@@ -221,7 +226,7 @@ abstract public class ApigeeEntity extends Jsonable {
         resultList.add(item);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      //Empty Search
     }
     return resultList;
   }
