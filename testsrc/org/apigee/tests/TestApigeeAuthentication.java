@@ -121,7 +121,6 @@ public class TestApigeeAuthentication {
    *           the jSON exception
    */
   @Test
-  @SuppressWarnings("unused")
   public void testSavedAccessCode() throws JSONException {
     ApigeeAuthentication auth = new ApigeeAuthentication("apigeejava",
         "sandbox", "123", 3600);
