@@ -25,13 +25,13 @@ public class TestApigeeEntity {
     elephant.intValue = 67;
     elephant.stringValue = "testVal";
     elephant.save(ApigeeTestFactory.getService());
-    Elephant loaded = ApigeeEntity.getById(ApigeeTestFactory.getService(), elephant.getId(), Elephant.class);
+    Elephant loaded = ApigeeEntity.getById(ApigeeTestFactory.getService(), elephant.getUuid(), Elephant.class);
     assertEquals(67, loaded.intValue);
     assertEquals("testVal", loaded.stringValue);
     elephant.intValue = 123;
     elephant.stringValue = "new test Value";
     elephant.save(ApigeeTestFactory.getService());
-    loaded = ApigeeEntity.getById(ApigeeTestFactory.getService(), elephant.getId(), Elephant.class);
+    loaded = ApigeeEntity.getById(ApigeeTestFactory.getService(), elephant.getUuid(), Elephant.class);
     elephant.delete(ApigeeTestFactory.getService());
     assertEquals(123, loaded.intValue);
     assertEquals("new test Value", loaded.stringValue);
@@ -46,7 +46,7 @@ public class TestApigeeEntity {
     elephant.intValue = 67;
     elephant.stringValue = "testVal";
     elephant.save(ApigeeTestFactory.getService());
-    Elephant loaded = ApigeeEntity.getById(ApigeeTestFactory.getService(), elephant.getId(), Elephant.class);
+    Elephant loaded = ApigeeEntity.getById(ApigeeTestFactory.getService(), elephant.getUuid(), Elephant.class);
     elephant.delete(ApigeeTestFactory.getService());
     assertEquals("elephant", loaded.type);
   }
@@ -62,7 +62,7 @@ public class TestApigeeEntity {
     elephant.stringValue = "pickles are yummy";
     elephant.save(ApigeeTestFactory.getService());
     Elephant elephant2 = new Elephant();
-    elephant2.loadById(ApigeeTestFactory.getService(), elephant.getId());
+    elephant2.loadById(ApigeeTestFactory.getService(), elephant.getUuid());
     elephant2.delete(ApigeeTestFactory.getService());
     assertEquals(elephant.toString(), elephant2.toString());
   }

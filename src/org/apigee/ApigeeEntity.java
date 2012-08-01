@@ -1,5 +1,6 @@
 package org.apigee;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +16,32 @@ import org.json.Jsonable;
 abstract public class ApigeeEntity extends Jsonable {
 
   /** The id. */
-  protected String id;
+  protected String uuid;
+  
+  /** The id. */
+  protected String name;
   
   /** The type. */
   public String type;
+  
+  /**
+   * Instantiates a new data object.
+   */
+  public ApigeeEntity()
+  {
+  }
+
+  /**
+   * Instantiates a new data object.
+   * 
+   * @param Name
+   *          the name
+   */
+  public ApigeeEntity(ApigeeService service, String Name)
+  {
+    name = Name;
+    loadById(service, name);
+  }
   
   /**
    * Save.
@@ -29,16 +52,22 @@ abstract public class ApigeeEntity extends Jsonable {
    */
   public boolean save(ApigeeService service) {
     String collectionName = getCollectionName(this.getClass());
+    if (name == null) {
+      name = getUuid();
+    }
     if (type == null) {
       type = collectionName;
     }
     if (exists(service)) {
-      return service.putUrl(collectionName + "/" + id, toJSON()).has("entities");
+      return service.putUrl(collectionName + "/" + getIndex(), toJSON()).has("entities");
     }
     JSONObject response = service.postUrl(collectionName, toJSON());
     try {
-      id = response.getJSONArray("entities").getJSONObject(0)
+      uuid = response.getJSONArray("entities").getJSONObject(0)
           .getString("uuid");
+      if (name == null) {
+        name = uuid;
+      }
       return true;
     } catch (JSONException e) {
       return false;
@@ -53,7 +82,7 @@ abstract public class ApigeeEntity extends Jsonable {
    */
   public void delete(ApigeeService service) {
     String collectionName = getCollectionName(this.getClass());
-    service.deleteUrl(collectionName + "/" + id);
+    service.deleteUrl(collectionName + "/" + uuid);
   }
 
   /**
@@ -61,13 +90,35 @@ abstract public class ApigeeEntity extends Jsonable {
    * 
    * @return the id
    */
-  public String getId() {
-    return id;
+  public String getUuid() {
+    return uuid;
+  }
+
+  /**
+   * Sets the id.
+   */
+  public void setUuid(String Uuid) {
+    uuid = Uuid;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String Name) {
+    this.name = Name;
+  }
+
+  private String getIndex() {
+    if (uuid == null) {
+      return name;
+    }
+    return uuid;
   }
 
   private boolean exists(ApigeeService service) {
     String collectionName = getCollectionName(this.getClass());
-    return service.getUrl(collectionName + "/" + id).has("entities");
+    return service.getUrl(collectionName + "/" + getIndex()).has("entities");
   }
   
   /**
@@ -109,7 +160,9 @@ abstract public class ApigeeEntity extends Jsonable {
     JSONObject response = service.getUrl(collectionName + "/" + ID);
     try {
       loadFromJson(response.getJSONArray("entities").getJSONObject(0));
-      id = ID;
+      if (name == null) {
+        name = uuid;
+      }
       return true;
     } catch (JSONException e) {
       return false;
@@ -130,7 +183,7 @@ abstract public class ApigeeEntity extends Jsonable {
   {
     String collectionName = getCollectionName(this.getClass());
     String entityCollectionName = getCollectionName(entity.getClass());
-    service.postUrl(collectionName + "/" + id + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getId());
+    service.postUrl(collectionName + "/" + uuid + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getUuid());
   }
   
   /**
@@ -147,7 +200,7 @@ abstract public class ApigeeEntity extends Jsonable {
   {
     String collectionName = getCollectionName(this.getClass());
     String entityCollectionName = getCollectionName(entity.getClass());
-    service.deleteUrl(collectionName + "/" + id + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getId());
+    service.deleteUrl(collectionName + "/" + uuid + "/" + connectionType + "/" + entityCollectionName + "/" + entity.getUuid());
   }
   
   /**
@@ -185,19 +238,9 @@ abstract public class ApigeeEntity extends Jsonable {
    */
   public <T extends ApigeeEntity> List<T> getConnection(ApigeeService service, String connectionType, Class<T> classType, String query)
   {
-    List<T> resultList = new ArrayList<T>();
-    try {
-      String collectionName = getCollectionName(this.getClass());
-      JSONObject response = service.getUrl(collectionName + "/" + id + "/" + connectionType + "?ql=" + query);
-      JSONArray entities = response.getJSONArray("entities");
-      for (int i = 0; i < entities.length(); i++) {
-        T item = loadFromJson(entities.getJSONObject(i), classType);
-        resultList.add(item);
-      }
-    } catch (Exception e) {
-      //Empty Connection
-    }
-    return resultList;
+    String collectionName = getCollectionName(this.getClass());
+    return handlePages(service, collectionName + "/" + uuid + "/"
+        + connectionType + "?ql=" + query, classType);
   }
 
   /**
@@ -214,19 +257,40 @@ abstract public class ApigeeEntity extends Jsonable {
    * @return the list
    */
   public static <T extends ApigeeEntity> List<T> search(ApigeeService service,
-      String query, Class<T> type) {
+      String query, Class<T> type)
+  {
+    String encodedQuery = "";
+    try {
+      encodedQuery = URLEncoder.encode(query, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    String collectionName = getCollectionName(type);
+    return handlePages(service, collectionName + "?ql="
+        + encodedQuery, type);
+  }
+  
+  private static <T extends ApigeeEntity> List<T> handlePages(ApigeeService service, String url, Class<T> type)
+  {
     List<T> resultList = new ArrayList<T>();
     try {
-      String encodedQuery = URLEncoder.encode(query, "UTF-8");
-      String collectionName = getCollectionName(type);
-      JSONObject response = service.getUrl(collectionName + "?ql=" + encodedQuery);
+      JSONObject response = service.getUrl(url + "&limit=100");
       JSONArray entities = response.getJSONArray("entities");
       for (int i = 0; i < entities.length(); i++) {
         T item = loadFromJson(entities.getJSONObject(i), type);
         resultList.add(item);
       }
-    } catch (Exception e) {
-      //Empty Search
+      while (response.has("cursor")) {
+        response = service.getUrl(url + "&limit=100&cursor="
+            + response.getString("cursor"));
+        entities = response.getJSONArray("entities");
+        for (int i = 0; i < entities.length(); i++) {
+          T item = loadFromJson(entities.getJSONObject(i), type);
+          resultList.add(item);
+        }
+      }
+    } catch (JSONException e) {
+      // Empty Search
     }
     return resultList;
   }
@@ -251,6 +315,56 @@ abstract public class ApigeeEntity extends Jsonable {
       // If the class does not override collection name then use class name
       return type.getSimpleName().toLowerCase();
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.json.Jsonable#toString()
+   */
+  @Override
+  public String toString()
+  {
+    return toJSON().toString();
+  }
+
+  /**
+   * Get All.
+   * 
+   * @param type
+   *          the type
+   * @return the all
+   */
+  public static String getAllAsJson(ApigeeService service, Class<? extends ApigeeEntity> type)
+  {
+    JSONArray ja = new JSONArray();
+    for(ApigeeEntity entity : search(service, "", type))
+    {
+      ja.put(entity.toJSON());
+    }
+    return ja.toString();
+  }
+  
+  /**
+   * Instantiate from json.
+   * 
+   * @param <T>
+   *          the generic type
+   * @param jo
+   *          the jo
+   * @param type
+   *          the type
+   * @return the fb user
+   */
+  public static <T extends ApigeeEntity> T instantiateFromJson(JSONObject jo,
+      Class<T> type)
+  {
+    T dataObject = null;
+    try {
+      dataObject = type.getConstructor(String.class).newInstance(jo.getString("name"));
+      dataObject.loadFromJson(jo);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return dataObject;
   }
 
 }
